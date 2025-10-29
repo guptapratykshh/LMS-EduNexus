@@ -13,6 +13,7 @@ const httpServer = createServer(app);
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   'http://localhost:3000',
+  'https://edunexus-frontend-owtp.onrender.com',
   'https://edunexus-frontend.onrender.com',
   'https://edunexus-lms.onrender.com',
   'https://edunexus-frontend-fvyc.onrender.com'
