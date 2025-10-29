@@ -11,6 +11,14 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    // Ensure environment variables are available in production
+    envPrefix: 'VITE_',
+  },
+  define: {
+    // Make API URL available at build time
+    __API_URL__: JSON.stringify(process.env.VITE_API_URL || 'https://edunexus-backend-fvyc.onrender.com'),
   }
 })
 
