@@ -22,21 +22,13 @@ const Assignments = () => {
 
   const fetchAssignments = async () => {
     try {
-      console.log('=== FETCHING ASSIGNMENTS ===');
-      console.log('Course ID:', courseId);
-      
       const token = localStorage.getItem('token');
       const response = await axios.get(`/api/assignments/course/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      console.log('Assignments fetched:', response.data);
-      console.log('Number of assignments:', response.data.length);
-      
       setAssignments(response.data);
     } catch (error) {
       console.error('Error fetching assignments:', error);
-      console.error('Error details:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -158,28 +150,42 @@ const Assignments = () => {
       ) : (
         <div className="assignments-list">
           {assignments.map(assignment => (
-            <div key={assignment._id} className="card" style={{ border: '2px solid #e5e7eb', borderRadius: '8px', padding: '1.5rem', marginBottom: '1rem', backgroundColor: '#fff' }}>
+            <div key={assignment._id} className="card">
               <h3>{assignment.title}</h3>
-              {assignment.description && <p style={{ color: '#666', marginTop: '0.5rem' }}>{assignment.description}</p>}
+              <p>{assignment.description}</p>
               {assignment.dueDate && (
-                <p style={{ color: '#dc2626', fontWeight: '600', marginTop: '0.5rem' }}>
-                  Due: {new Date(assignment.dueDate).toLocaleString()}
-                </p>
+                <p>Due: {new Date(assignment.dueDate).toLocaleString()}</p>
               )}
               
-              {/* Show uploaded assignment file if available */}
+              {/* Show original assignment file to instructors and students */}
               {assignment.fileUrl && (
-                <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '5px', border: '1px solid #bae6fd' }}>
+                <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f0f9ff', borderRadius: '5px', border: '1px solid #bae6fd' }}>
                   <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#0369a1' }}>📎 Assignment File:</p>
-                  <a 
-                    href={assignment.fileUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary"
-                    style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-                  >
-                    📄 View/Download File
-                  </a>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <a href={assignment.fileUrl} download className="btn btn-secondary" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                      📥 Download Assignment
+                    </a>
+                    <a href={assignment.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                      🔗 View File
+                    </a>
+                  </div>
+                  
+                  {/* Display assignment file preview */}
+                  {assignment.fileUrl.includes('.pdf') || assignment.fileUrl.match(/pdf/i) ? (
+                    <iframe 
+                      src={assignment.fileUrl} 
+                      width="100%" 
+                      height="400px" 
+                      style={{ marginTop: '1rem', border: '1px solid #ddd', borderRadius: '5px' }}
+                      title="Assignment Preview"
+                    />
+                  ) : assignment.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) || assignment.fileUrl.includes('image/') ? (
+                    <img 
+                      src={assignment.fileUrl} 
+                      alt="Assignment Preview" 
+                      style={{ marginTop: '1rem', maxWidth: '100%', maxHeight: '300px', borderRadius: '5px', border: '1px solid #ddd' }}
+                    />
+                  ) : null}
                 </div>
               )}
               
@@ -194,115 +200,55 @@ const Assignments = () => {
                 </div>
               )}
               
-              {user?.role === 'student' && (() => {
-                // Check if current user has already submitted
-                const userSubmission = assignment.submissions?.find(sub => {
-                  const subStudentId = sub.student?._id?.toString() || sub.student?.toString() || sub.student;
-                  const currentUserId = user._id?.toString();
-                  console.log('Checking submission:', { subStudentId, currentUserId, match: subStudentId === currentUserId });
-                  return subStudentId === currentUserId || 
-                         subStudentId?.substring(0, 24) === currentUserId?.substring(0, 24);
-                });
-                const isSubmitted = !!userSubmission;
-                console.log('Assignment submission status:', { assignmentId: assignment._id, isSubmitted, submissionsCount: assignment.submissions?.length });
-
-                return (
-                  <div style={{ marginTop: '1rem' }}>
-                    {isSubmitted ? (
-                      <div>
-                        <div style={{ padding: '1rem', backgroundColor: '#d1fae5', borderRadius: '8px', border: '2px solid #059669', marginBottom: '1rem' }}>
-                          <p style={{ color: '#059669', fontWeight: '700', marginBottom: '0.5rem', fontSize: '1.1rem' }}>
-                            ✅ Assignment Submitted
-                          </p>
-                          {userSubmission.fileUrl && (
-                            <div style={{ marginTop: '1rem' }}>
-                              <p style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#065f46' }}>Your Submission:</p>
-                              <a 
-                                href={userSubmission.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-secondary"
-                                style={{ marginRight: '1rem' }}
-                              >
-                                📄 View Your File
-                              </a>
-                              <button
-                                onClick={async () => {
-                                  if (window.confirm('Are you sure you want to delete this submission?')) {
-                                    try {
-                                      const token = localStorage.getItem('token');
-                                      await axios.delete(`/api/assignments/${assignment._id}/submissions/${userSubmission._id}`, {
-                                        headers: { Authorization: `Bearer ${token}` }
-                                      });
-                                      alert('Submission deleted successfully!');
-                                      fetchAssignments();
-                                    } catch (error) {
-                                      alert('Failed to delete submission');
-                                    }
-                                  }
-                                }}
-                                className="btn btn-danger"
-                              >
-                                🗑️ Delete Submission
-                              </button>
-                            </div>
-                          )}
+              {user?.role === 'student' && (
+                <div style={{ marginTop: '1rem' }}>
+                  {/* Check if already submitted */}
+                  {assignment.submissions?.find(sub => sub.student === user._id || sub.student === user._id.toString() || sub.student?._id === user._id) ? (
+                    <div>
+                      <p style={{ color: '#059669', fontWeight: '600', marginBottom: '1rem' }}>
+                        ✅ Assignment Submitted
+                      </p>
+                      {/* Show submitted file if available */}
+                      {assignment.submissions?.find(sub => sub.student === user._id || sub.student === user._id.toString() || sub.student?._id === user._id)?.fileUrl && (
+                        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '5px' }}>
+                          <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Your Submission:</p>
+                          <a 
+                            href={assignment.submissions?.find(sub => sub.student === user._id || sub.student === user._id.toString() || sub.student?._id === user._id)?.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-secondary"
+                          >
+                            📄 View Your File
+                          </a>
                         </div>
-                        
-                        {/* Re-submit option */}
-                        <details style={{ marginTop: '1rem' }}>
-                          <summary style={{ cursor: 'pointer', color: '#666', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '5px' }}>
-                            Want to submit a different file? Click to re-submit
-                          </summary>
-                          <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '5px' }}>
-                            <input type="file" id={`resubmit-file-${assignment._id}`} className="form-group" />
-                            <button 
-                              onClick={async () => {
-                                const fileInput = document.getElementById(`resubmit-file-${assignment._id}`);
-                                if (!fileInput.files[0]) {
-                                  alert('Please select a file first');
-                                  return;
-                                }
-                                try {
-                                  const token = localStorage.getItem('token');
-                                  const formData = new FormData();
-                                  formData.append('file', fileInput.files[0]);
-
-                                  await axios.post(`/api/assignments/${assignment._id}/submit`, formData, {
-                                    headers: {
-                                      Authorization: `Bearer ${token}`,
-                                      'Content-Type': 'multipart/form-data'
-                                    }
-                                  });
-
-                                  alert('Assignment re-submitted successfully!');
-                                  fetchAssignments();
-                                } catch (error) {
-                                  alert('Failed to re-submit assignment');
-                                }
-                              }}
-                              className="btn btn-primary"
-                              style={{ marginTop: '0.5rem' }}
-                            >
-                              Submit New File
-                            </button>
-                          </div>
-                        </details>
-                      </div>
-                    ) : (
-                      <div>
-                        <input type="file" id={`file-${assignment._id}`} className="form-group" />
-                        <button 
-                          onClick={() => handleSubmitAssignment(assignment._id)}
-                          className="btn btn-success"
-                        >
-                          Submit Assignment
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+                      )}
+                      {/* Re-submit option */}
+                      <details style={{ marginTop: '1rem' }}>
+                        <summary style={{ cursor: 'pointer', color: '#666' }}>Re-submit Assignment</summary>
+                        <div style={{ marginTop: '1rem' }}>
+                          <input type="file" id={`file-${assignment._id}`} className="form-group" />
+                          <button 
+                            onClick={() => handleSubmitAssignment(assignment._id)}
+                            className="btn btn-primary"
+                          >
+                            Submit Again
+                          </button>
+                        </div>
+                      </details>
+                    </div>
+                  ) : (
+                    <div>
+                      <input type="file" id={`file-${assignment._id}`} className="form-group" />
+                      <button 
+                        onClick={() => handleSubmitAssignment(assignment._id)}
+                        className="btn btn-success"
+                      >
+                        Submit Assignment
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

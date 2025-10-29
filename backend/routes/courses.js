@@ -243,5 +243,46 @@ router.post('/:id/enroll', auth, async (req, res) => {
   }
 });
 
+// Get all video lectures across all courses (admin only)
+router.get('/lectures/all', auth, authorize('admin'), async (req, res) => {
+  try {
+    // Find all courses
+    const courses = await Course.find()
+      .populate('instructor', 'name email')
+      .select('title instructor lectures')
+      .sort({ createdAt: -1 });
+    
+    console.log('📹 Found courses:', courses.length);
+    
+    // Flatten all lectures from all courses
+    const allLectures = courses.flatMap(course => {
+      if (course.lectures && course.lectures.length > 0) {
+        return course.lectures.map(lecture => ({
+          ...lecture.toObject(),
+          courseTitle: course.title,
+          courseId: course._id,
+          instructorName: course.instructor?.name,
+          instructorEmail: course.instructor?.email
+        }));
+      }
+      return [];
+    });
+    
+    console.log('📹 Total lectures found:', allLectures.length);
+    
+    // Sort by createdAt (newest first)
+    allLectures.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return dateB - dateA;
+    });
+    
+    res.json(allLectures);
+  } catch (error) {
+    console.error('📹 Error fetching lectures:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;
 

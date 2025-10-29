@@ -44,57 +44,82 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Register for EduNexus</h2>
-        {error && <div className="error-message">{error}</div>}
+        <div className="auth-header">
+          <div className="auth-logo"></div>
+          <h1>EDUNEXUS LMS</h1>
+          <p>Create Your Account</p>
+        </div>
         
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-          </div>
+        <div className="auth-body">
+          {error && <div className="error-message">{error}</div>}
           
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Password (min. 6 characters)</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>I am a</label>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                style={{ 
+                  borderColor: formData.role === 'admin' ? '#dc2626' : undefined,
+                  borderWidth: formData.role === 'admin' ? '2px' : undefined
+                }}
+              >
+                <option value="student">Student</option>
+                <option value="instructor">Instructor</option>
+                <option value="admin" style={{ color: '#dc2626', fontWeight: 'bold' }}>🔐 Admin (Full Access)</option>
+              </select>
+              {formData.role === 'admin' && (
+                <small style={{ color: '#dc2626', fontWeight: '600', display: 'block', marginTop: '0.5rem' }}>
+                  ⚠️ Admin has full control - Use responsibly
+                </small>
+              )}
+            </div>
+            
+            <button type="submit" className="btn btn-primary">Register</button>
+          </form>
           
-          <div className="form-group">
-            <label>Password (min. 6 characters)</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-            />
-          </div>
+          <p className="auth-link">
+            Already have an account? <Link to="/login">Login here</Link>
+          </p>
           
-          <div className="form-group">
-            <label>I am a</label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            >
-              <option value="student">Student</option>
-              <option value="instructor">Instructor</option>
-            </select>
+          <div className="auth-footer">
+            <p>Join EduNexus Community</p>
+            <p>Your gateway to quality education</p>
           </div>
-          
-          <button type="submit" className="btn btn-primary">Register</button>
-        </form>
-        
-        <p className="auth-link">
-          Already have an account? <Link to="/login">Login here</Link>
-        </p>
+        </div>
       </div>
     </div>
   );

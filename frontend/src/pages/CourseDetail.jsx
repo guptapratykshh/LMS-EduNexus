@@ -7,15 +7,23 @@ import VideoModal from '../components/VideoModal';
 
 const CourseDetail = () => {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   useEffect(() => {
-    fetchCourse();
-  }, [id]);
+    // Reset state when course ID changes
+    setCourse(null);
+    setLoading(true);
+    setIsEnrolled(false);
+    
+    // Fetch course data when auth is loaded
+    if (!authLoading) {
+      fetchCourse();
+    }
+  }, [id, authLoading, user]);
 
   const fetchCourse = async () => {
     try {
@@ -25,24 +33,24 @@ const CourseDetail = () => {
       });
       setCourse(response.data);
       
-      // Check if enrolled - improved logic
-      if (response.data.enrollments && response.data.enrollments.length > 0) {
+      // Check if enrolled - handle populated objects or simple IDs
+      if (response.data.enrollments && response.data.enrollments.length > 0 && user) {
         const userId = user?._id?.toString();
-        console.log('Checking enrollment for user:', userId);
-        console.log('Course enrollments:', response.data.enrollments);
+        console.log('🔍 Checking enrollment for user:', userId);
+        console.log('📋 Course enrollments:', JSON.stringify(response.data.enrollments, null, 2));
         
         const enrolled = response.data.enrollments.some(enrollment => {
-          const enrollmentId = enrollment?._id?.toString() || enrollment?.toString() || '';
-          const isEnrolled = enrollmentId === userId || 
-                           enrollmentId?.substring(0, 24) === userId?.substring(0, 24);
+          // Handle both populated object {_id: '...'} and simple string ID
+          const enrollmentId = (enrollment?._id || enrollment)?.toString();
+          const isEnrolled = enrollmentId === userId;
           console.log('Comparing enrollmentId:', enrollmentId, 'with userId:', userId, '->', isEnrolled);
           return isEnrolled;
         });
         
-        console.log('Is enrolled?', enrolled);
+        console.log('✅ Final enrollment status:', enrolled);
         setIsEnrolled(enrolled);
       } else {
-        console.log('No enrollments found');
+        console.log('ℹ️ No enrollments found or user not loaded');
         setIsEnrolled(false);
       }
     } catch (error) {
@@ -58,13 +66,34 @@ const CourseDetail = () => {
       const response = await axios.post(`/api/courses/${id}/enroll`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Enrollment response:', response.data);
+      console.log('✅ Enrollment successful:', response.data);
       alert('Successfully enrolled in course!');
-      fetchCourse();
+      
+      // Refresh the course data to get updated enrollments
+      setLoading(true);
+      const courseResponse = await axios.get(`/api/courses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setCourse(courseResponse.data);
+      
+      // Now user should be in enrollments
+      const userId = user?._id?.toString();
+      if (courseResponse.data.enrollments && courseResponse.data.enrollments.length > 0) {
+        const enrolled = courseResponse.data.enrollments.some(enrollment => {
+          const enrollmentId = (enrollment?._id || enrollment)?.toString();
+          return enrollmentId === userId;
+        });
+        console.log('✅ Enrollment status after enroll:', enrolled);
+        setIsEnrolled(enrolled);
+      }
+      
+      setLoading(false);
     } catch (error) {
-      console.error('Error enrolling:', error);
+      console.error('❌ Error enrolling:', error);
       const errorMessage = error.response?.data?.message || 'Failed to enroll in course';
       alert(errorMessage);
+      setLoading(false);
     }
   };
 

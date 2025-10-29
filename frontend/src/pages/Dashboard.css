@@ -1,22 +1,28 @@
 .dashboard {
   padding: 2rem 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf0 100%);
+  min-height: calc(100vh - 80px);
 }
 
 .dashboard h1 {
   margin-bottom: 0.5rem;
-  color: #1f2937;
+  color: #1e3a5f;
+  font-weight: 700;
+  text-align: center;
 }
 
 .dashboard > p {
   color: #6b7280;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .dashboard-alert {
-  background: #dbeafe;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   padding: 1rem;
-  border-radius: 5px;
+  border-radius: 8px;
   margin-bottom: 2rem;
+  border-left: 4px solid #3b82f6;
 }
 
 .dashboard-alert a {
@@ -34,14 +40,15 @@
 .course-card {
   background: white;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
 }
 
 .course-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .course-card h3 {
@@ -65,7 +72,22 @@
 
 .loading {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   color: #6b7280;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.loading h2 {
+  color: #1e3a5f;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.loading p {
+  color: #6b7280;
+  margin-bottom: 1rem;
 }
 

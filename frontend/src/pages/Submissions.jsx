@@ -54,6 +54,40 @@ const Submissions = () => {
       <h2>Assignment: {assignment.title}</h2>
       <p>{assignment.description}</p>
       
+      {/* Show original assignment file */}
+      {assignment.fileUrl && (
+        <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '2px solid #bae6fd' }}>
+          <h3 style={{ marginBottom: '1rem', color: '#0369a1' }}>📎 Original Assignment File</h3>
+          <div style={{ marginBottom: '1rem' }}>
+            <a href={assignment.fileUrl} download className="btn btn-primary" style={{ marginRight: '1rem' }}>
+              📥 Download Assignment
+            </a>
+            <a href={assignment.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+              🔗 Open in New Tab
+            </a>
+          </div>
+          
+          {/* Display assignment file */}
+          <div style={{ marginTop: '1rem' }}>
+            {assignment.fileUrl.includes('.pdf') || assignment.fileUrl.match(/pdf/i) ? (
+              <iframe 
+                src={assignment.fileUrl} 
+                width="100%" 
+                height="500px" 
+                style={{ border: '2px solid #ddd', borderRadius: '8px' }}
+                title="Assignment PDF Viewer"
+              />
+            ) : assignment.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) || assignment.fileUrl.includes('image/') ? (
+              <img 
+                src={assignment.fileUrl} 
+                alt="Assignment File" 
+                style={{ maxWidth: '100%', maxHeight: '500px', borderRadius: '8px', border: '2px solid #ddd' }}
+              />
+            ) : null}
+          </div>
+        </div>
+      )}
+      
       <h3>Submissions ({assignment.submissions?.length || 0})</h3>
       
       {assignment.submissions?.length === 0 ? (

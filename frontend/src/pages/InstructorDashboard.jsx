@@ -69,19 +69,13 @@ const InstructorDashboard = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
+      <div className="dashboard-header" style={{ justifyContent: 'center' }}>
         <h1>My Courses</h1>
-        <Link to="/create-course" className="btn btn-primary">
-          + Create New Course
-        </Link>
       </div>
       
       {myCourses.length === 0 ? (
         <div className="empty-state">
           <p>You haven't created any courses yet.</p>
-          <Link to="/create-course" className="btn btn-primary">
-            Create Your First Course
-          </Link>
         </div>
       ) : (
         <div className="courses-grid">

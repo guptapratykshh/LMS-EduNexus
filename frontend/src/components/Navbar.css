@@ -1,8 +1,11 @@
 .navbar {
-  background-color: #1f2937;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6b 100%);
   color: white;
   padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .navbar-container {
@@ -19,6 +22,14 @@
   font-weight: bold;
   text-decoration: none;
   color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.05);
 }
 
 .navbar-menu {
@@ -31,12 +42,14 @@
   color: white;
   text-decoration: none;
   padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  border-radius: 6px;
+  transition: all 0.3s;
+  font-weight: 500;
 }
 
 .navbar-link:hover {
-  background-color: #374151;
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }
 
 .navbar-user {
@@ -44,8 +57,26 @@
 }
 
 .navbar-role {
-  color: #9ca3af;
+  color: #d1d5db;
   text-transform: uppercase;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.navbar-user {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.btn {
+  transition: all 0.3s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
