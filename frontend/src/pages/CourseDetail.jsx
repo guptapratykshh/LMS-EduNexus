@@ -140,6 +140,9 @@ const CourseDetail = () => {
               <Link to={`/course/${course._id}/assignments`} className="btn btn-secondary">
                 📝 Assignments
               </Link>
+              <Link to={`/course/${course._id}/live`} className="btn btn-secondary">
+                📺 Live Classes
+              </Link>
             </>
           )}
           {isInstructor && (
@@ -150,11 +153,14 @@ const CourseDetail = () => {
               <Link to={`/course/${course._id}/assignments`} className="btn btn-secondary">
                 View Assignments
               </Link>
+              <Link to={`/course/${course._id}/live`} className="btn btn-secondary">
+                📅 Schedule Live
+              </Link>
             </>
           )}
         </div>
         
-        {!isEnrolled && !isInstructor && user?.role === 'student' && (
+        {!loading && !authLoading && !isEnrolled && !isInstructor && user?.role === 'student' && (
           <button onClick={handleEnroll} className="btn btn-primary">
             Enroll in Course
           </button>
@@ -213,14 +219,26 @@ const CourseDetail = () => {
                         </p>
                       </div>
                     ) : lecture.videoUrl.startsWith('data:video/') || lecture.videoUrl.startsWith('http://') || lecture.videoUrl.startsWith('https://') ? (
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         <button 
                           onClick={() => setSelectedVideo(lecture.videoUrl)}
                           className="btn btn-primary video-play-btn"
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.9rem', lineHeight: 1, display: 'inline-block', width: 'auto' }}
                         >
                           ▶️ Play Video
                         </button>
-                        {lecture.duration && <span style={{ color: '#666' }}>Duration: {lecture.duration}</span>}
+                        {lecture.duration && (
+                          <span style={{
+                            color: '#374151',
+                            fontSize: '0.85rem',
+                            background: '#eef2ff',
+                            border: '1px solid #dbeafe',
+                            padding: '2px 8px',
+                            borderRadius: '9999px'
+                          }}>
+                            {lecture.duration}
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <p style={{ color: '#999', fontStyle: 'italic' }}>No video available</p>

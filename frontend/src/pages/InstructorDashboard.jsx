@@ -88,9 +88,14 @@ const InstructorDashboard = () => {
                 <span>{course.enrollments?.length || 0} students</span>
               </div>
               <div className="course-actions">
-                <Link to={`/course/${course._id}`} className="btn btn-primary">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    window.location.assign(`/course/${course._id}`);
+                  }}
+                >
                   View Course
-                </Link>
+                </button>
                 <Link to={`/edit-course/${course._id}`} className="btn btn-secondary">
                   Edit Course
                 </Link>

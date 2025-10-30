@@ -74,9 +74,14 @@ const StudentDashboard = () => {
                 <span>{course.lectures?.length || 0} lectures</span>
               </div>
               <div className="course-actions">
-                <Link to={`/course/${course._id}`} className="btn btn-primary">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    window.location.assign(`/course/${course._id}`);
+                  }}
+                >
                   Continue Learning
-                </Link>
+                </button>
                 <Link to={`/chat/${course._id}`} className="btn btn-secondary">
                   Chat
                 </Link>

@@ -14,6 +14,8 @@ import Chat from './pages/Chat';
 import Assignments from './pages/Assignments';
 import EditCourse from './pages/EditCourse';
 import Submissions from './pages/Submissions';
+import LiveSchedule from './pages/LiveSchedule';
+import LiveRoom from './pages/LiveRoom';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -111,6 +113,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Assignments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/course/:id/live"
+          element={
+            <ProtectedRoute>
+              <LiveSchedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/live/:sessionId"
+          element={
+            <ProtectedRoute>
+              <LiveRoom />
             </ProtectedRoute>
           }
         />

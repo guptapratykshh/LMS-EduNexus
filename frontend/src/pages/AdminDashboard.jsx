@@ -12,6 +12,7 @@ const AdminDashboard = () => {
   const [videoLectures, setVideoLectures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [liveSessions, setLiveSessions] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -20,13 +21,14 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const [usersRes, coursesRes, assignmentsRes, chatsRes, messagesRes, lecturesRes] = await Promise.all([
+      const [usersRes, coursesRes, assignmentsRes, chatsRes, messagesRes, lecturesRes, liveRes] = await Promise.all([
         axios.get('/api/users', { headers: { Authorization: `Bearer ${token}` } }),
         axios.get('/api/courses', { headers: { Authorization: `Bearer ${token}` } }),
         axios.get('/api/assignments', { headers: { Authorization: `Bearer ${token}` } }).catch((err) => { console.log('Assignments error:', err.message); return { data: [] }; }),
         axios.get('/api/chat/all', { headers: { Authorization: `Bearer ${token}` } }).catch((err) => { console.log('Chats API error:', err.message); return { data: [] }; }),
         axios.get('/api/chat/messages/all', { headers: { Authorization: `Bearer ${token}` } }).catch((err) => { console.log('Messages API error:', err.message); return { data: [] }; }),
-        axios.get('/api/courses/lectures/all', { headers: { Authorization: `Bearer ${token}` } }).catch((err) => { console.log('Lectures API error:', err.message); return { data: [] }; })
+        axios.get('/api/courses/lectures/all', { headers: { Authorization: `Bearer ${token}` } }).catch((err) => { console.log('Lectures API error:', err.message); return { data: [] }; }),
+        axios.get('/api/live/active', { headers: { Authorization: `Bearer ${token}` } }).catch((err) => { console.log('Live API error:', err.message); return { data: [] }; })
       ]);
       console.log('✅ Fetched chats:', chatsRes.data?.length || 0);
       console.log('✅ Fetched messages:', messagesRes.data?.length || 0);
@@ -37,6 +39,7 @@ const AdminDashboard = () => {
       setChats(chatsRes.data || []);
       setAllMessages(messagesRes.data || []);
       setVideoLectures(lecturesRes.data || []);
+      setLiveSessions(liveRes.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -191,6 +194,20 @@ const AdminDashboard = () => {
           }}
         >
           🎥 Video Lectures ({totalLectures})
+        </button>
+        <button
+          onClick={() => setActiveTab('live')}
+          style={{ 
+            padding: '0.75rem 1.5rem', 
+            border: 'none', 
+            background: activeTab === 'live' ? '#3b82f6' : 'transparent',
+            color: activeTab === 'live' ? 'white' : '#666',
+            cursor: 'pointer',
+            borderRadius: '5px 5px 0 0',
+            fontWeight: '600'
+          }}
+        >
+          📺 Live Sessions ({liveSessions.length})
         </button>
       </div>
 
@@ -553,6 +570,30 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Live Sessions Tab */}
+      {activeTab === 'live' && (
+        <div className="admin-section">
+          <h2>📺 Active Live Sessions</h2>
+          {liveSessions.length === 0 ? (
+            <p style={{ color: '#999' }}>No live sessions at the moment.</p>
+          ) : (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {liveSessions.map(s => (
+                <div key={s._id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem', backgroundColor: '#fff' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{s.title}</div>
+                      <div style={{ color: '#666', fontSize: '0.9rem' }}>Course: {s.course?.title} • Instructor: {s.instructor?.name}</div>
+                    </div>
+                    <a className="btn btn-secondary" href={`/live/${s._id}`}>Join as Observer</a>
+                  </div>
                 </div>
               ))}
             </div>

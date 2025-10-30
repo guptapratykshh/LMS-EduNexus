@@ -46,7 +46,9 @@ router.get('/:id', auth, async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
       .populate('instructor', 'name email')
-      .populate('lectures');
+      .populate('lectures')
+      // Ensure enrollments are fully available so client can reliably detect membership
+      .populate('enrollments', '_id name email role');
     
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });

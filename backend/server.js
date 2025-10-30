@@ -55,8 +55,9 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/live', require('./routes/live'));
 
-// Socket.io for real-time chat
+// Socket.io for real-time chat and live sessions
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -78,6 +79,22 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+  });
+
+  // Live session signaling
+  socket.on('live:join', ({ roomCode, userId, name }) => {
+    socket.join(roomCode);
+    io.to(roomCode).emit('live:peer:join', { userId, name });
+  });
+
+  // Relay SDP/ICE between peers within the room
+  socket.on('live:signal', ({ roomCode, to, from, data }) => {
+    io.to(roomCode).emit('live:signal', { to, from, data });
+  });
+
+  socket.on('live:leave', ({ roomCode, userId }) => {
+    socket.leave(roomCode);
+    io.to(roomCode).emit('live:peer:leave', { userId });
   });
 });
 
